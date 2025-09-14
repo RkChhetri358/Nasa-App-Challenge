@@ -1,0 +1,100 @@
+* {
+  box-sizing: border-box;
+}
+
+.carousel {
+  position: relative;
+  width: 90%;
+  max-width: 800px;
+  margin: 40px auto;
+  overflow: hidden;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.carousel-inner {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+
+.carousel-item {
+  min-width: 100%;
+  opacity: 0.4;
+  transform: scale(0.9);
+  transition: all 0.8s ease-in-out;
+}
+
+.carousel-item.active {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.carousel-item img {
+  width: 100%;
+  display: block;
+  border-radius: 15px;
+}
+
+/* Buttons */
+.prev, .next {
+  position: absolute;
+  top: 50%;
+  padding: 10px 15px;
+  background: rgba(0,0,0,0.4);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  transition: 0.3s;
+  z-index: 10;
+}
+
+.prev:hover, .next:hover {
+  background: rgba(0,0,0,0.6);
+}
+
+.prev {
+  left: 15px;
+}
+
+.next {
+  right: 15px;
+}
+
+/* Dots */
+.dots {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.dot {
+  display: inline-block;
+  height: 12px;
+  width: 12px;
+  background: #bbb;
+  border-radius: 50%;
+  margin: 0 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.dot.active {
+  background: #333;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .carousel {
+    width: 100%;
+    border-radius: 10px;
+  }
+
+  .prev, .next {
+    padding: 8px 12px;
+  }
+
+  .carousel-item.active {
+    transform: scale(1.02);
+  }
+}

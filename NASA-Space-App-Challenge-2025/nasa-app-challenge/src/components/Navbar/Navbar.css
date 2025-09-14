@@ -10,13 +10,21 @@
   justify-content: space-between;
   align-items: center;
   padding: 15px 50px;
-  background: linear-gradient(-45deg, #5a5959, #93a59e, #4c8c9e, #151616);
+  background: linear-gradient(-45deg, #3f3f46, #2a233b, #482c63, #151616);
   background-size: 400% 400%;
   animation: gradientAnimation 15s ease infinite;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 5px 10px rgba(0,0,0,0.1);
   position: sticky;
   top: 0;
   z-index: 1000;
+  transition: background 0.5s, backdrop-filter 0.5s;
+}
+
+.navbar.scrolled {
+  background: rgba(255, 255, 255, 0.05);  /* transparent glassy */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 @keyframes gradientAnimation {

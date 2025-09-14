@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://openseadragon.github.io/openseadragon/openseadragon.min.js"></script>
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      .overlay-marker {
+        border: 2px solid red;
+        background-color: rgba(255, 0, 0, 0.2);
+        border-radius: 50%;
+        cursor: pointer;
+      }
+      .overlay-marker.star {
+        border-color: cyan;
+        background-color: rgba(0, 255, 255, 0.2);
+      }
+      .overlay-marker.galaxy {
+        border-color: yellow;
+        background-color: rgba(255, 255, 0, 0.2);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="openseadragon-viewer" style="width: 100%; height: 100%"></div>
+    <script type="text/javascript">
+      var viewer = OpenSeadragon({
+          id: "openseadragon-viewer",
+          prefixUrl: "https://openseadragon.github.io/openseadragon/images/",
+          tileSources: "%DZI_PATH%",
+          showNavigator: true,
+          navigatorPosition: "BOTTOM_RIGHT",
+          crossOriginPolicy: "Anonymous"
+      });
+
+      viewer.addHandler('open', function() {
+          // --- CORRECTED LINE: Removed JSON.parse and quotes ---
+          var detections = %DETECTIONS_JSON%;
+
+          console.log("Detections Data:", detections);
+
+          detections.forEach(function(detection) {
+              var marker = document.createElement("div");
+              marker.className = "overlay-marker " + detection.type;
+              marker.title = `Type: ${detection.type}\nConfidence: ${detection.confidence.toFixed(2)}`;
+
+              // For this demo, we assume the image coordinates from the placeholder.
+              var imagePoint = new OpenSeadragon.Point(detection.ra, detection.dec);
+              var viewportPoint = viewer.viewport.imageToViewportCoordinates(imagePoint);
+
+              viewer.addOverlay({
+                  element: marker,
+                  location: viewportPoint,
+                  placement: 'CENTER',
+                  width: 0.01,
+                  height: 0.01,
+                  checkResize: false
+              });
+          });
+      });
+    </script>
+  </body>
+</html>
+streamlit run app.pystreamlit run app.py

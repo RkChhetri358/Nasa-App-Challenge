@@ -1,0 +1,117 @@
+.footer {
+  position: relative;
+  background: radial-gradient(circle at 50% 50%, #0b0c2c 0%, #000000 100%);
+  color: white;
+  text-align: center;
+  padding: 100px 20px 60px;
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Footer content */
+.footer-content h2 {
+  font-size: 28px;
+  margin-bottom: 10px;
+  color: #00ffff;
+  text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 40px #00ffff;
+}
+
+.footer-content p {
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #ffffffaa;
+}
+
+.links a {
+  color: #ff77ff;
+  margin: 0 15px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.links a:hover {
+  color: #00ffff;
+  text-shadow: 0 0 5px #00ffff, 0 0 15px #00ffff;
+}
+
+.social-icons a {
+  color: #ff77ff;
+  margin: 0 10px;
+  font-size: 18px;
+  transition: transform 0.3s, color 0.3s;
+}
+
+.social-icons a:hover {
+  transform: scale(1.3);
+  color: #00ffff;
+}
+
+/* Stars */
+.stars {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: transparent;
+  box-shadow:
+    50px 100px #fff,
+    200px 50px #fff,
+    400px 150px #fff,
+    600px 200px #fff,
+    800px 100px #fff,
+    1000px 150px #fff;
+  animation: twinkle 5s linear infinite;
+}
+
+/* Twinkle animation */
+@keyframes twinkle {
+  0%, 100% { transform: translateY(0) translateX(0); opacity: 1; }
+  50% { transform: translateY(-5px) translateX(5px); opacity: 0.7; }
+}
+
+/* Planets */
+.planet {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.8;
+  filter: blur(15px);
+  animation: float 20s linear infinite alternate;
+}
+
+.planet1 {
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, #ff66cc, #9900ff);
+  top: 20%;
+  left: 10%;
+  animation-duration: 18s;
+}
+
+.planet2 {
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, #00ffff, #0077ff);
+  bottom: 15%;
+  right: 15%;
+  animation-duration: 25s;
+}
+
+/* Floating animation */
+@keyframes float {
+  0% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(20px) translateX(15px); }
+  100% { transform: translateY(-20px) translateX(-15px); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .footer-content h2 {
+    font-size: 24px;
+  }
+  .links a {
+    margin: 0 10px;
+  }
+  .social-icons a {
+    font-size: 16px;
+  }
+}

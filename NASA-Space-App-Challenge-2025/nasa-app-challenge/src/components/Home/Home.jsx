@@ -1,12 +1,15 @@
 
-import React, { useState } from 'react';
+import React, { useState ,useEffect } from 'react';
+import AOS from 'aos';
 
 
 
 import OpenSeadragonViewer from '../OpenSeadragon/OpenSeadragonViewer';
+import CarouselHome from '../Carousel/CarouselHome';
 
 
 const Home = () => {
+
       const images = [
     {
       url: "https://openseadragon.github.io/example-images/duomo/duomo.dzi",
@@ -34,10 +37,29 @@ const Home = () => {
   const nextImage = () => {
     setIndex((i) => (i + 1) % images.length);
   };
+    useEffect(() => {
+    AOS.init({ duration: 5000 });
+  }, []);
+
+
+
+
     return (
         
         <>
-    <div className="App" style={{ padding: "20px" }}>
+        
+   
+
+<div className="caurosel">
+  
+<CarouselHome/>
+</div>
+
+
+
+
+
+  {/* <div className="OpenSeaDragon" style={{ padding: "20px" }}>
       <center><h1>OpenSeadragon Gallery</h1>
 </center>
       <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -70,7 +92,7 @@ const Home = () => {
           Next
         </button>
       </div>
-    </div>
+    </div>  */}
 
 
 

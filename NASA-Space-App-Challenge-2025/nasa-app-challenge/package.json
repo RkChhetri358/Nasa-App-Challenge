@@ -11,10 +11,13 @@
   },
   "dependencies": {
     "aos": "^2.3.4",
+    "dom": "^0.0.3",
     "openseadragon": "^5.0.1",
     "prop-types": "^15.8.1",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.9.1",
+    "router": "^2.2.0",
     "three": "^0.179.1"
   },
   "devDependencies": {

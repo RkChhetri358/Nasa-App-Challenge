@@ -1,5 +1,6 @@
 import React, { useState,useEffect } from "react";
 import "./Navbar.css";
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
 
@@ -27,11 +28,11 @@ const Navbar = () => {
       <div className="logo">Embiggen Your Eyes!</div>
       
       <ul className={menuOpen ? "nav-links active" : "nav-links"} style={{ paddingRight: "20px" ,paddingTop:"10px", fontSize:"18px" }}>
-        <li><a href="#">Home</a></li>
+        <li><Link to="/">Home</Link></li>
         <li><a href="#">About</a></li>
-        <li><a href="#">Explore</a></li>
       
         <li><a href="#">Contact</a></li>
+        <li><Link to='/explore'>Explore</Link></li>
       </ul>
 
       <div className={menuOpen ? "hamburger toggle" : "hamburger"} onClick={toggleMenu}>

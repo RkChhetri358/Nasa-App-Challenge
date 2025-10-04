@@ -12,7 +12,8 @@ const SpacePeekCards = () => {
       description: "The smallest and fastest planet in our solar system, Mercury completes an orbit around the Sun every 88 days.",
       distance: "57.9 million km from Sun",
       diameter: "4,879 km",
-      color: "bg-gray-400"
+      color: "bg-gray-400",
+      imageUrl:"https://assets.science.nasa.gov/dynamicimage/assets/science/psd/solar-system/mercury/images/messenger_high_resolution_view_of_mercury_pia_13840.jpg?w=4575&h=4575&fit=clip&crop=faces%2Cfocalpoint"
     },
     {
       id: 2,
@@ -98,7 +99,11 @@ const SpacePeekCards = () => {
           >
             {/* Planet Visual */}
             <div className="flex justify-center mb-6">
-              <div className={`w-32 h-32 ${currentPlanet.color} rounded-full shadow-lg`}></div>
+              <img
+              src={currentPlanet.imageUrl}
+                alt={currentPlanet.name}      // e.g., "Mercury"
+                className="w-32 h-32 rounded-full shadow-lg object-cover"
+              />
             </div>
 
             {/* Planet Name */}
@@ -107,6 +112,7 @@ const SpacePeekCards = () => {
             </h2>
 
             {/* Planet Info */}
+            {/* Comment */}
             <div className="space-y-3 mb-6">
               <div className="flex justify-between items-center py-2 border-b border-gray-200">
                 <span className="text-gray-600 font-medium">Distance from Sun</span>
@@ -124,9 +130,8 @@ const SpacePeekCards = () => {
             </p>
 
             {/* Explore Button */}
-            <button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg">
+            <button className="w-full bg-[#07173F] hover:bg-[#0a192f] text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg">
               Explore Now
-              <ExternalLink className="w-5 h-5" />
             </button>
           </div>
         </div>

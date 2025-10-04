@@ -18,7 +18,10 @@ export default function App() {
         </>} />
         
         <Route path="/explore" element={<Explore />} />
+
       </Routes>
+ <SpacePeekCards />
+          <Footer />      
     </div>
   );
 }

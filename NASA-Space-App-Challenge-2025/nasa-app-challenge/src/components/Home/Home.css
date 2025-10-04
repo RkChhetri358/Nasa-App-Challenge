@@ -1,0 +1,89 @@
+/* .animation{
+    height:80px;
+    width:400px;
+    background-color:#872d3a;
+    border-radius:20px;
+} */
+/* Home.css */
+.home {
+  min-height: 100vh;
+  min-width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow:hidden;
+  /* Gradient overlay + background image */
+  background: 
+    linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.2)), 
+    url("https://images.unsplash.com/photo-1591360607974-ca109f8d5996?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlYXJ0aCUyMHNwYWNlJTIwdmlld3xlbnwxfHx8fDE3NTc4Njc2NjZ8MA&ixlib=rb-4.1.0&q=80&w=1080");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden; /* keep stars inside */
+}
+
+/* optional: tweak your starfield so stars stay visible over bg */
+.starfield {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+
+.galaxy-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.starfield {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: moveStar 10s linear infinite;
+}
+
+@keyframes moveStar {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.8;
+  }
+  80% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(100vh) scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* Randomize star positions and animation delays */
+.star:nth-child(1)  { left: 10vw; animation-delay: 0s; }
+.star:nth-child(2)  { left: 20vw; animation-delay: 2s; }
+.star:nth-child(3)  { left: 30vw; animation-delay: 4s; }
+.star:nth-child(4)  { left: 40vw; animation-delay: 1s; }
+.star:nth-child(5)  { left: 50vw; animation-delay: 3s; }
+.star:nth-child(6)  { left: 60vw; animation-delay: 5s; }
+.star:nth-child(7)  { left: 70vw; animation-delay: 2.5s; }
+.star:nth-child(8)  { left: 80vw; animation-delay: 1.5s; }
+.star:nth-child(9)  { left: 90vw; animation-delay: 3.5s; }
+.star:nth-child(10) { left: 15vw; animation-delay: 6s; }
+/* ...repeat for more stars, or use a CSS preprocessor for automation... */
+/* Add to your home.css */
+.main-content {
+  padding-top: 5rem; /* or 80px, matching your navbar height */
+}

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NASA Massive Image Explorer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js"></script>
+<style>
+/* ==== STYLES: unchanged from your original ==== */
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:linear-gradient(135deg,#0c1445 0%,#1a1a2e 50%,#16213e 100%); color:white; overflow:hidden;}
+.container {display:flex;height:100vh;width:100vw;}
+.sidebar {width:350px;background:rgba(0,20,40,0.95);backdrop-filter:blur(10px);border-right:1px solid rgba(255,255,255,0.1);padding:20px;overflow-y:auto;z-index:1000;}
+.main-viewer {flex:1;position:relative;background:#000;}
+.header{text-align:center;margin-bottom:30px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.1);}
+.header h1{font-size:24px;background:linear-gradient(45deg,#4a9eff,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:5px;}
+.header p{font-size:12px;opacity:0.8;}
+.section{margin-bottom:25px;}
+.section h3{color:#4a9eff;margin-bottom:15px;font-size:16px;display:flex;align-items:center;}
+.section h3::before{content:"▶";margin-right:8px;font-size:12px;}
+.dataset-grid{display:grid;gap:10px;margin-bottom:15px;}
+.dataset-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:15px;cursor:pointer;transition:all 0.3s ease;position:relative;}
+.dataset-card:hover{background:rgba(255,255,255,0.1);border-color:#4a9eff;transform:translateY(-2px);}
+.dataset-card.active{background:rgba(74,158,255,0.2);border-color:#4a9eff;}
+.dataset-title{font-weight:bold;margin-bottom:8px;color:#4a9eff;}
+.dataset-meta{font-size:12px;opacity:0.8;}
+.controls{background:rgba(255,255,255,0.05);border-radius:8px;padding:15px;margin-bottom:15px;}
+.control-group{margin-bottom:15px;}
+.control-group:last-child{margin-bottom:0;}
+.control-group label{display:block;margin-bottom:8px;font-size:14px;color:#4a9eff;}
+input[type="range"]{width:100%;height:6px;border-radius:3px;background:rgba(255,255,255,0.2);outline:none;-webkit-appearance:none;}
+input[type="range"]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;background:#4a9eff;cursor:pointer;}
+input[type="text"],select{width:100%;padding:10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:5px;color:white;font-size:14px;}
+input[type="text"]:focus,select:focus{outline:none;border-color:#4a9eff;}
+.btn{background:linear-gradient(45deg,#4a9eff,#00d4ff);border:none;color:white;padding:10px 15px;border-radius:5px;cursor:pointer;font-size:14px;transition:all 0.3s ease;width:100%;margin-top:5px;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 5px 15px rgba(74,158,255,0.3);}
+.btn-secondary{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);}
+.btn-secondary:hover{background:rgba(255,255,255,0.2);}
+.toolbar{position:absolute;top:20px;right:20px;z-index:100;display:flex;gap:10px;background:rgba(0,20,40,0.9);padding:10px;border-radius:8px;backdrop-filter:blur(10px);}
+.toolbar button{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;padding:8px 12px;border-radius:5px;cursor:pointer;font-size:12px;transition:all 0.3s ease;}
+.toolbar button:hover{background:rgba(255,255,255,0.2);}
+.toolbar button.active{background:#4a9eff;}
+.search-results{max-height:200px;overflow-y:auto;background:rgba(0,0,0,0.5);border-radius:5px;margin-top:10px;}
+.search-result{padding:8px 12px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.1);font-size:12px;}
+.search-result:hover{background:rgba(255,255,255,0.1);}
+.labels-list{max-height:150px;overflow-y:auto;}
+.label-item{display:flex;justify-content:space-between;align-items:center;padding:8px;background:rgba(255,255,255,0.05);margin-bottom:5px;border-radius:5px;font-size:12px;}
+.label-item:hover{background:rgba(255,255,255,0.1);}
+.label-color{width:16px;height:16px;border-radius:50%;margin-right:8px;}
+.info-panel{position:absolute;bottom:20px;left:20px;z-index:100;background:rgba(0,20,40,0.95);padding:15px;border-radius:8px;backdrop-filter:blur(10px);max-width:300px;border:1px solid rgba(255,255,255,0.1);display:none;}
+.loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1000;background:rgba(0,20,40,0.95);padding:30px;border-radius:10px;text-align:center;}
+.spinner{border:3px solid rgba(255,255,255,0.1);border-top:3px solid #4a9eff;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:0 auto 15px;}
+@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+.time-controls{display:flex;align-items:center;gap:10px;margin-top:10px;}
+.time-controls button{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;padding:5px 10px;border-radius:3px;cursor:pointer;font-size:12px;}
+.comparison-mode{display:none;}
+.comparison-mode.active{display:block;}
+.viewer-container{position:relative;width:100%;height:100%;}
+#openseadragon1,#openseadragon2{width:100%;height:100%;}
+.comparison-mode #openseadragon1{width:50%;float:left;}
+.comparison-mode #openseadragon2{width:50%;float:right;}
+</style>
+</head>
+<body>
+<div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div>Loading NASA Image Explorer...</div>
+</div>
+
+<div class="container">
+    <div class="sidebar">
+        <div class="header">
+            <h1>NASA Image Explorer</h1>
+            <p>Explore massive space imagery datasets</p>
+        </div>
+
+        <div class="section">
+            <h3>Datasets</h3>
+            <div class="dataset-grid" id="datasetGrid"></div>
+            <button class="btn" onclick="loadSampleDatasets()">Load Sample Data</button>
+        </div>
+
+        <div class="section">
+            <h3>Search & Navigation</h3>
+            <div class="controls">
+                <div class="control-group">
+                    <label>Search Features:</label>
+                    <input type="text" id="searchInput" placeholder="e.g., 'crater', 'storm', 'galaxy center'">
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+                <div class="control-group">
+                    <label>Go to Coordinates:</label>
+                    <input type="text" id="coordsInput" placeholder="x, y (0.0 to 1.0)">
+                    <button class="btn btn-secondary" onclick="goToCoordinates()">Navigate</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Image Controls</h3>
+            <div class="controls">
+                <div class="control-group">
+                    <label>Opacity: <span id="opacityValue">100%</span></label>
+                    <input type="range" id="opacitySlider" min="0" max="100" value="100">
+                </div>
+                <div class="control-group">
+                    <label>Contrast: <span id="contrastValue">100%</span></label>
+                    <input type="range" id="contrastSlider" min="50" max="200" value="100">
+                </div>
+                <div class="control-group">
+                    <label>View Mode:</label>
+                    <select id="viewMode">
+                        <option value="single">Single View</option>
+                        <option value="comparison">Side-by-Side Comparison</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Labels & Annotations</h3>
+            <div class="controls">
+                <div class="control-group">
+                    <label>Add Label:</label>
+                    <input type="text" id="labelInput" placeholder="Label name">
+                    <input type="color" id="labelColor" value="#ff0000">
+                    <button class="btn btn-secondary" onclick="enableLabelMode()">Add Label</button>
+                </div>
+                <div class="labels-list" id="labelsList"></div>
+                <button class="btn" onclick="exportLabels()">Export Labels</button>
+                <button class="btn btn-secondary" onclick="importLabels()">Import Labels</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Time Series / Sequence</h3>
+            <div class="controls">
+                <input type="range" id="timeSlider" min="0" max="0" value="0" disabled>
+                <div class="time-controls">
+                    <button onclick="prevFrame()">Prev</button>
+                    <button onclick="nextFrame()">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-viewer">
+        <div class="viewer-container">
+            <div id="openseadragon1"></div>
+            <div id="openseadragon2" class="comparison-mode"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==== VARIABLES ====
+let viewer1, viewer2;
+let currentDataset = null;
+let labels = [];
+let labelMode = false;
+
+// ==== INIT VIEWERS ====
+viewer1 = OpenSeadragon({
+    id: "openseadragon1",
+    prefixUrl: "https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/images/",
+    showNavigator: true,
+    animationTime: 0.5
+});
+
+viewer2 = OpenSeadragon({
+    id: "openseadragon2",
+    prefixUrl: "https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/images/",
+    showNavigator: true,
+    animationTime: 0.5
+});
+
+// ==== SAMPLE DATASETS ====
+const sampleDatasets = [
+    {
+        id: "mars_global",
+        title: "Mars Global Mosaic",
+        description: "Global Mars imagery from NASA.",
+        tileSource: "http://localhost:8000/dzi/mars_global",
+        features: [
+            {name:"Olympus Mons", x:0.3, y:0.4, color:"#ff0000"},
+            {name:"Valles Marineris", x:0.6, y:0.5, color:"#00ff00"}
+        ],
+        timeFrames: null
+    },
+    {
+        id: "hubble_andromeda",
+        title: "Hubble Andromeda",
+        description: "Hubble telescope deep field of Andromeda galaxy.",
+        tileSource: "http://localhost:8000/dzi/hubble_andromeda",
+        features: [
+            {name:"Core", x:0.5, y:0.5, color:"#ff00ff"},
+            {name:"Dust Lane", x:0.3, y:0.7, color:"#00ffff"}
+        ],
+        timeFrames: null
+    }
+];
+
+// ==== LOAD DATASETS GRID ====
+function loadSampleDatasets() {
+    const grid = document.getElementById("datasetGrid");
+    grid.innerHTML = "";
+    sampleDatasets.forEach(dataset => {
+        const card = document.createElement("div");
+        card.className = "dataset-card";
+        card.innerHTML = `<div class="dataset-title">${dataset.title}</div><div class="dataset-meta">${dataset.description}</div>`;
+        card.onclick = () => loadDataset(dataset, card);
+        grid.appendChild(card);
+    });
+}
+
+// ==== LOAD DATASET ====
+function loadDataset(dataset, cardElement = null) {
+    currentDataset = dataset;
+    document.querySelectorAll('.dataset-card').forEach(card => card.classList.remove('active'));
+    if (cardElement) cardElement.classList.add('active');
+
+    viewer1.open(dataset.tileSource);
+
+    if (document.getElementById('viewMode').value === "comparison") {
+        document.getElementById('openseadragon2').classList.add("active");
+        viewer2.open(dataset.tileSource);
+    } else {
+        document.getElementById('openseadragon2').classList.remove("active");
+    }
+
+    labels = dataset.features || [];
+    updateLabelsDisplay();
+
+    if (dataset.timeFrames) {
+        document.getElementById('timeSlider').disabled = false;
+        document.getElementById('timeSlider').max = dataset.timeFrames.length - 1;
+    } else {
+        document.getElementById('timeSlider').disabled = true;
+    }
+}
+
+// ==== LABELS ====
+function updateLabelsDisplay() {
+    const list = document.getElementById('labelsList');
+    list.innerHTML = "";
+    labels.forEach((label, idx) => {
+        const item = document.createElement("div");
+        item.className = "label-item";
+        item.innerHTML = `<span><span class="label-color" style="background:${label.color}"></span>${label.name}</span>
+                          <button onclick="removeLabel(${idx})">✖</button>`;
+        list.appendChild(item);
+    });
+}
+
+function enableLabelMode() {
+    labelMode = true;
+    alert("Click on the viewer to place the label.");
+}
+
+viewer1.addHandler("canvas-click", function(event) {
+    if (!labelMode) return;
+    const imgPoint = viewer1.viewport.pointFromPixel(event.position);
+    const name = document.getElementById('labelInput').value || "Label";
+    const color = document.getElementById('labelColor').value;
+    labels.push({name, x: imgPoint.x, y: imgPoint.y, color});
+    labelMode = false;
+    updateLabelsDisplay();
+});
+
+// ==== SEARCH ====
+document.getElementById('searchInput').addEventListener('input', function() {
+    const val = this.value.toLowerCase();
+    const resultsDiv = document.getElementById('searchResults');
+    resultsDiv.innerHTML = "";
+    if (!currentDataset || !currentDataset.features) return;
+    const results = currentDataset.features.filter(f => f.name.toLowerCase().includes(val));
+    results.forEach(f => {
+        const div = document.createElement('div');
+        div.className = "search-result";
+        div.innerText = f.name;
+        div.onclick = () => goToFeature(f);
+        resultsDiv.appendChild(div);
+    });
+});
+
+function goToFeature(feature) {
+    const point = new OpenSeadragon.Point(feature.x, feature.y);
+    viewer1.viewport.panTo(point);
+    viewer1.viewport.zoomTo(1);
+}
+
+// ==== COORDINATES NAVIGATION ====
+function goToCoordinates() {
+    const val = document.getElementById('coordsInput').value;
+    const parts = val.split(',').map(v=>parseFloat(v.trim()));
+    if (parts.length === 2) viewer1.viewport.panTo(new OpenSeadragon.Point(parts[0], parts[1]));
+}
+
+// ==== VIEW MODE ====
+document.getElementById('viewMode').addEventListener('change', function() {
+    if (this.value === "comparison" && currentDataset) {
+        document.getElementById('openseadragon2').classList.add("active");
+        viewer2.open(currentDataset.tileSource);
+    } else {
+        document.getElementById('openseadragon2').classList.remove("active");
+    }
+});
+
+// ==== IMAGE CONTROLS ====
+document.getElementById('opacitySlider').addEventListener('input', function() {
+    const val = this.value;
+    document.getElementById('openseadragon1').style.opacity = val/100;
+    document.getElementById('opacityValue').innerText = val+"%";
+});
+
+document.getElementById('contrastSlider').addEventListener('input', function() {
+    const val = this.value;
+    document.getElementById('openseadragon1').style.filter = `contrast(${val}%)`;
+    document.getElementById('contrastValue').innerText = val+"%";
+});
+
+// ==== LABEL IMPORT/EXPORT ====
+function exportLabels() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(labels));
+    const a = document.createElement("a");
+    a.href = dataStr;
+    a.download = "labels.json";
+    a.click();
+}
+
+function importLabels() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    input.onchange = e => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            labels = JSON.parse(ev.target.result);
+            updateLabelsDisplay();
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+// ==== REMOVE LABEL ====
+function removeLabel(idx) {
+    labels.splice(idx,1);
+    updateLabelsDisplay();
+}
+
+// ==== TIME SLIDER ====
+function prevFrame() {
+    const slider = document.getElementById('timeSlider');
+    if (slider.value > 0) slider.value--;
+}
+
+function nextFrame() {
+    const slider = document.getElementById('timeSlider');
+    if (slider.value < slider.max) slider.value++;
+}
+
+// ==== FINALLY ====
+document.getElementById("loading").style.display = "none";
+loadSampleDatasets();
+</script>
+</body>
+</html>

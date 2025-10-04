@@ -7,18 +7,18 @@ import { FaRobot, FaGlobe, FaMapMarkedAlt } from "react-icons/fa";
 import { SiNasa } from "react-icons/si";
 
 export default function Explore() {
-  const [planet, setPlanet] = useState("mars");
+  const [planet, setPlanet] = useState("moon");
   const [viewMode, setViewMode] = useState("2d");
   const [detectMode, setDetectMode] = useState(false);
   const [features, setFeatures] = useState([]);
 
-  const proxy = "http://127.0.0.1:8000"; // FastAPI backend
+  const proxy = "http://127.0.0.1:8000";
 
   useEffect(() => {
     AOS.init({ duration: 1500 });
   }, []);
 
-  // Run AI Detection
+  // Run detection (fetch labels)
   const runDetection = async () => {
     try {
       const response = await fetch(`${proxy}/detect/${planet}`);
@@ -26,21 +26,12 @@ export default function Explore() {
       setFeatures(data.features || []);
       alert(`🧠 AI detected ${data.features.length} features!`);
     } catch (err) {
-      console.error("AI detection failed:", err);
+      console.error("Detection failed:", err);
     }
   };
 
-  // Tile sources for OpenSeadragon
+  // Tile sources
   const tileSources = {
-    mars: {
-      width: 65536,
-      height: 32768,
-      tileSize: 256,
-      minLevel: 0,
-      maxLevel: 7,
-      getTileUrl: (level, x, y) =>
-        `${proxy}/proxy/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0/default/default028mm/${level}/${y}/${x}.jpg`,
-    },
     moon: {
       width: 21600,
       height: 10800,
@@ -57,22 +48,12 @@ export default function Explore() {
       minLevel: 0,
       maxLevel: 7,
       getTileUrl: (level, x, y) =>
-        `${proxy}/mercury/2d?level=${level}&x=${x}&y=${y}`, // backend 2D map
-    },
-    venus: {
-      width: 23040,
-      height: 11520,
-      tileSize: 256,
-      minLevel: 0,
-      maxLevel: 7,
-      getTileUrl: (level, x, y) =>
-        `${proxy}/proxy/Venus/EQ/Venus_Magellan_C3-MDIR_Global_Mosaic_2025m/1.0.0/default/default028mm/${level}/${y}/${x}.jpg`,
+        `${proxy}/mercury/2d?level=${level}&x=${x}&y=${y}`,
     },
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0b132b] via-[#1c2541] to-[#3a506b] text-white flex flex-col items-center py-10 px-5">
-      {/* Header */}
       <motion.div data-aos="fade-down" className="flex items-center gap-3 mb-6">
         <SiNasa className="text-4xl text-sky-400" />
         <h1 className="text-3xl font-bold tracking-wide">
@@ -80,9 +61,8 @@ export default function Explore() {
         </h1>
       </motion.div>
 
-      {/* Planet Selector */}
       <motion.div data-aos="fade-right" className="flex gap-3 mb-8 flex-wrap justify-center">
-        {["mars", "moon", "mercury", "venus"].map((p) => (
+        {["moon", "mercury"].map((p) => (
           <button
             key={p}
             onClick={() => setPlanet(p)}
@@ -95,7 +75,6 @@ export default function Explore() {
         ))}
       </motion.div>
 
-      {/* Mode Selector */}
       <motion.div data-aos="fade-left" className="flex gap-3 mb-8 flex-wrap justify-center">
         <button
           onClick={() => setViewMode("2d")}
@@ -122,25 +101,20 @@ export default function Explore() {
               detectMode ? "bg-red-600 hover:bg-red-500" : "bg-yellow-500 hover:bg-yellow-400"
             }`}
           >
-            <FaRobot />
-            {detectMode ? "Stop Detection" : "Detect Features"}
+            <FaRobot /> {detectMode ? "Stop Detection" : "Detect Features"}
           </button>
         )}
       </motion.div>
 
-      {/* Viewer Section */}
       <motion.div
         data-aos="zoom-in"
         className="w-full max-w-6xl h-[600px] rounded-xl overflow-hidden shadow-2xl border border-gray-700"
       >
         {viewMode === "2d" ? (
-          <OpenSeadragonViewer
-            tileSource={tileSources[planet]}
-            features={detectMode ? features : []}
-          />
+          <OpenSeadragonViewer tileSource={tileSources[planet]} features={detectMode ? features : []} />
         ) : planet === "mercury" ? (
           <iframe
-            src={`${proxy}/mercury/3d`} // backend 3D
+            src={`${proxy}/mercury/3d`}
             width="100%"
             height="100%"
             style={{ border: "none" }}
@@ -148,7 +122,7 @@ export default function Explore() {
           />
         ) : (
           <iframe
-            src={`https://eyes.nasa.gov/apps/solar-system/#/${planet}?embed=true`}
+            src={`${proxy}/moon/3d`}
             width="100%"
             height="100%"
             style={{ border: "none" }}
@@ -157,7 +131,6 @@ export default function Explore() {
         )}
       </motion.div>
 
-      {/* Detection Button */}
       {detectMode && (
         <motion.button
           data-aos="fade-up"

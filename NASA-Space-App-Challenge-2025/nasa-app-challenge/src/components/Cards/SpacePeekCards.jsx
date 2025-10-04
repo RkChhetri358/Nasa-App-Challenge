@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 
+<<<<<<< HEAD
 const SpacePeekCards = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState('next');
@@ -77,6 +78,23 @@ const SpacePeekCards = () => {
   };
 
   const currentPlanet = planets[currentIndex];
+=======
+const images = [
+  {
+    id: 1084,
+    thumb: "https://picsum.photos/id/1084/800/400",
+    title: "Nebula Drift",
+    desc: "A colorful nebula with billowing clouds of gas and dust."
+  },
+  {
+    id: 1063,
+    thumb: "https://picsum.photos/id/1063/800/400",
+    title: "Starfield",
+    desc: "A dense starfield — millions of distant suns glittering."
+  }
+];
+//comment
+>>>>>>> f64067d6d950b993e8e6a3eda0eb705018e04247
 
   return (
     <div className="min-h-screen bg-[#07173F] flex items-center justify-center p-4">

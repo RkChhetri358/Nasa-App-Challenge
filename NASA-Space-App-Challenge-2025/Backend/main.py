@@ -118,15 +118,13 @@
 
 #     return {"features": results}
 
-
-
 from fastapi import FastAPI, Path, Query
 from fastapi.responses import StreamingResponse, Response, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import os, httpx
 
-# Import Mercury visualizer
-from mercury_visualizer import MercuryVisualizer
+# Import Moon visualizer
+from moon_visualizer import MoonVisualizer  # <- your updated class
 
 app = FastAPI()
 
@@ -142,41 +140,39 @@ app.add_middleware(
 CURRENT_FILE = os.path.abspath(__file__)
 PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_FILE, "..", ".."))
 
-# === Mercury visualizer instance ===
-mercury_vis = MercuryVisualizer(
-    proxy="https://trek.nasa.gov/tiles",
-    layer="Mercury/EQ/Mercury_MESSENGER_MDIS_Basemap_BDR_Mosaic_Global_166m/1.0.0/default/default028mm",
-    shapefile_path=os.path.join(PROJECT_ROOT, "Backend", "MercuryData", "MERCURY_nomenclature_center_pts.shp"),
-    zoom=3
+# === Moon visualizer instance ===
+moon_vis = MoonVisualizer(
+    proxy="http://127.0.0.1:8000/proxy",
+    layer="Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0/default/default028mm",
+    shapefile_path=os.path.join(PROJECT_ROOT, "Backend", "MoonData", "MOON_nomenclature_center_pts.shp"),
+    zoom=3,
+    min_diameter=50,
+    max_labels=500
 )
 
 # === Preload basemap on startup ===
 @app.on_event("startup")
-async def preload_mercury():
-    mercury_vis.fetch_basemap()
-    print("✅ Mercury basemap preloaded and cached")
+async def preload_moon():
+    moon_vis.fetch_basemap()
+    print("✅ Moon basemap preloaded and cached")
 
 # === Root ===
 @app.get("/")
 async def root():
     return {"message": "NASA Space App Backend running!"}
 
-# === Mercury endpoints ===
-@app.get("/mercury/2d")
-async def mercury_2d():
-    buf = mercury_vis.generate_2d()
+# === Moon endpoints ===
+@app.get("/moon/2d")
+async def moon_2d():
+    """Return labeled 2D Moon image as JPEG."""
+    buf = moon_vis.generate_2d()
     return StreamingResponse(buf, media_type="image/jpeg")
 
-@app.get("/mercury/3d")
-async def mercury_3d():
-    html = mercury_vis.generate_3d_html()
-    return HTMLResponse(html)
-
-@app.get("/mercury/labels")
-async def mercury_labels(limit: int = 500):
-    """Return Mercury feature labels as JSON (for frontend overlay/maps)."""
+@app.get("/moon/labels")
+async def moon_labels(limit: int = 500):
+    """Return Moon feature labels as JSON (for frontend overlay/maps)."""
     features = []
-    for _, row in mercury_vis.gdf.head(limit).iterrows():
+    for _, row in moon_vis.gdf.head(limit).iterrows():
         features.append({
             "name": row.get("name"),
             "type": row.get("type"),

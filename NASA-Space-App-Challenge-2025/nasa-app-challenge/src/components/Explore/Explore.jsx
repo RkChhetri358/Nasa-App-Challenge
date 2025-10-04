@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import AOS from "aos";
+import "aos/dist/aos.css";
 import OpenSeadragonViewer from "../OpenSeadragon/OpenSeadragonViewer";
+import { FaRobot, FaGlobe, FaMapMarkedAlt } from "react-icons/fa";
+import { SiNasa } from "react-icons/si";
 
 export default function Explore() {
   const [planet, setPlanet] = useState("mars");
@@ -8,9 +12,11 @@ export default function Explore() {
   const [detectMode, setDetectMode] = useState(false);
   const [features, setFeatures] = useState([]);
 
-  useEffect(() => { AOS.init({ duration: 2000 }); }, []);
-
   const proxy = "http://127.0.0.1:8000/proxy";
+
+  useEffect(() => {
+    AOS.init({ duration: 1500 });
+  }, []);
 
   const runDetection = async () => {
     const level = 0;
@@ -27,7 +33,7 @@ export default function Explore() {
       const response = await fetch(tileUrl);
       const data = await response.json();
       setFeatures(data.features || []);
-      alert(`Detected ${data.features.length} features!`);
+      alert(`🧠 AI detected ${data.features.length} features!`);
     } catch (err) {
       console.error("AI detection failed:", err);
     }
@@ -73,81 +79,90 @@ export default function Explore() {
   };
 
   return (
-    <div style={{ padding: "20px", backgroundColor: "#2f3b52", color: "#fff" }}>
-      <h1>Explore {planet.toUpperCase()}</h1>
+    <div className="min-h-screen bg-gradient-to-br from-[#0b132b] via-[#1c2541] to-[#3a506b] text-white flex flex-col items-center py-10 px-5">
+      {/* Header */}
+      <motion.div
+        data-aos="fade-down"
+        className="flex items-center gap-3 mb-6"
+      >
+        <SiNasa className="text-4xl text-sky-400" />
+        <h1 className="text-3xl font-bold tracking-wide">
+          Explore <span className="text-sky-300">{planet.toUpperCase()}</span>
+        </h1>
+      </motion.div>
 
-      <div style={{ marginBottom: "20px" }}>
+      {/* Planet Selector */}
+      <motion.div
+        data-aos="fade-right"
+        className="flex gap-3 mb-8 flex-wrap justify-center"
+      >
         {["mars", "moon", "mercury", "venus"].map((p) => (
           <button
             key={p}
             onClick={() => setPlanet(p)}
-            style={{
-              marginRight: "10px",
-              padding: "8px 16px",
-              backgroundColor: planet === p ? "#337ab7" : "#555",
-              color: "#fff",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-            }}
+            className={`px-5 py-2 rounded-lg font-semibold transition-all duration-300 shadow-md ${
+              planet === p
+                ? "bg-sky-500 hover:bg-sky-400"
+                : "bg-gray-700 hover:bg-gray-600"
+            }`}
           >
             {p.charAt(0).toUpperCase() + p.slice(1)}
           </button>
         ))}
-      </div>
+      </motion.div>
 
-      <div style={{ marginBottom: "20px" }}>
+      {/* Mode Selector */}
+      <motion.div
+        data-aos="fade-left"
+        className="flex gap-3 mb-8 flex-wrap justify-center"
+      >
         <button
           onClick={() => setViewMode("2d")}
-          style={{
-            marginRight: "10px",
-            padding: "8px 16px",
-            backgroundColor: viewMode === "2d" ? "#28a745" : "#555",
-            color: "#fff",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-          }}
+          className={`flex items-center gap-2 px-5 py-2 rounded-lg font-semibold transition-all ${
+            viewMode === "2d"
+              ? "bg-green-500 hover:bg-green-400"
+              : "bg-gray-700 hover:bg-gray-600"
+          }`}
         >
-          2D Map
+          <FaMapMarkedAlt /> 2D Map
         </button>
+
         <button
           onClick={() => setViewMode("3d")}
-          style={{
-            padding: "8px 16px",
-            backgroundColor: viewMode === "3d" ? "#28a745" : "#555",
-            color: "#fff",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-          }}
+          className={`flex items-center gap-2 px-5 py-2 rounded-lg font-semibold transition-all ${
+            viewMode === "3d"
+              ? "bg-green-500 hover:bg-green-400"
+              : "bg-gray-700 hover:bg-gray-600"
+          }`}
         >
-          3D Globe
+          <FaGlobe /> 3D Globe
         </button>
+
         {viewMode === "2d" && (
           <button
             onClick={() => setDetectMode(!detectMode)}
-            style={{
-              marginLeft: "10px",
-              padding: "8px 16px",
-              backgroundColor: detectMode ? "#dc3545" : "#ffc107",
-              color: "#fff",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-            }}
+            className={`flex items-center gap-2 px-5 py-2 rounded-lg font-semibold transition-all ${
+              detectMode
+                ? "bg-red-600 hover:bg-red-500"
+                : "bg-yellow-500 hover:bg-yellow-400"
+            }`}
           >
+            <FaRobot />
             {detectMode ? "Stop Detection" : "Detect Features"}
           </button>
         )}
-      </div>
+      </motion.div>
 
-      <div style={{ width: "100%", height: "600px" }}>
+      {/* Viewer Section */}
+      <motion.div
+        data-aos="zoom-in"
+        className="w-full max-w-6xl h-[600px] rounded-xl overflow-hidden shadow-2xl border border-gray-700"
+      >
         {viewMode === "2d" ? (
-        <OpenSeadragonViewer
-  tileSource={tileSources[planet]}
-  features={detectMode ? features : []}
-/>
+          <OpenSeadragonViewer
+            tileSource={tileSources[planet]}
+            features={detectMode ? features : []}
+          />
         ) : (
           <iframe
             src={`https://eyes.nasa.gov/apps/solar-system/#/${planet}?embed=true`}
@@ -157,45 +172,23 @@ export default function Explore() {
             allowFullScreen
           />
         )}
-      </div>
+      </motion.div>
 
+      {/* Detection Button */}
       {detectMode && (
-        <button
+        <motion.button
+          data-aos="fade-up"
           onClick={runDetection}
-          style={{
-            marginTop: "20px",
-            padding: "10px 20px",
-            backgroundColor: "#ff5722",
-            color: "#fff",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-          }}
+          className="mt-8 px-6 py-3 bg-orange-500 hover:bg-orange-400 text-white rounded-lg font-semibold shadow-lg flex items-center gap-2"
         >
+          <FaRobot />
           Run AI Detection
-        </button>
+        </motion.button>
       )}
+
+      <footer className="mt-10 text-gray-400 text-sm">
+        <p>Powered by NASA & AI — Built with ❤️</p>
+      </footer>
     </div>
   );
 }
-// import React from 'react'
-// import ModelViewers from '../Model Viewer/ModelViewer'
-// // import ModelViewer from '../Model Viewer/ModelViewers'
-
-// export default function Explore() {
-//   return (
-    
-//     <div>
-      
-      
-//  <ModelViewers
-//   url="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/main/2.0/ToyCar/glTF-Binary/ToyCar.glb"
-//   width={1000}
-//   height={1000}
-// /> 
-
-
-//     </div>
-//   )
-// }
-

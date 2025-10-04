@@ -15,15 +15,18 @@
     "@react-three/fiber": "^9.3.0",
     "aos": "^2.3.4",
     "dom": "^0.0.3",
+<<<<<<< HEAD
     "framer-motion": "^12.23.22",
+=======
     "lucide-react": "^0.544.0",
+>>>>>>> ca14ea3 (Frontend)
     "openseadragon": "^5.0.1",
     "prop-types": "^15.8.1",
     "react": "^19.1.1",
     "react-3d-viewer": "^1.0.12",
     "react-dom": "^19.1.1",
     "react-icons": "^5.5.0",
-    "react-router-dom": "^7.9.3",
+    "react-router-dom": "^7.9.1",
     "router": "^2.2.0",
     "three": "^0.179.1"
   },
@@ -42,3 +45,4 @@
     "vite": "^7.0.4"
   }
 }
+

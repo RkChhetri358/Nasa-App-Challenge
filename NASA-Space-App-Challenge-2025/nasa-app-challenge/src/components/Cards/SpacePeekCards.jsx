@@ -22,16 +22,9 @@ const SpacePeekCards = () => {
       diameter: "12,104 km",
       color: "bg-orange-300"
     },
+    
     {
       id: 3,
-      name: "Earth",
-      description: "Our home planet, the only known world with liquid water on its surface and the only place we know of inhabited by living things.",
-      distance: "149.6 million km from Sun",
-      diameter: "12,742 km",
-      color: "bg-blue-500"
-    },
-    {
-      id: 4,
       name: "Mars",
       description: "The Red Planet, known for its rusty color caused by iron oxide. Mars has the largest volcano and canyon in the solar system.",
       distance: "227.9 million km from Sun",
@@ -39,23 +32,23 @@ const SpacePeekCards = () => {
       color: "bg-red-500"
     },
     {
-      id: 5,
-      name: "Jupiter",
+      id: 4,
+      name: "Moon",
       description: "The largest planet in our solar system, a gas giant with a massive storm called the Great Red Spot that's been raging for centuries.",
       distance: "778.5 million km from Sun",
       diameter: "139,820 km",
       color: "bg-amber-600"
     },
     {
-      id: 6,
-      name: "Saturn",
+      id: 5,
+      name: "Phobos",
       description: "Famous for its spectacular ring system made of ice and rock particles. Saturn is the second-largest planet in our solar system.",
       distance: "1.43 billion km from Sun",
       diameter: "116,460 km",
       color: "bg-yellow-600"
     },
     {
-      id: 7,
+      id: 6,
       name: "Uranus",
       description: "An ice giant that rotates on its side, making it unique among all the planets. It has a pale blue-green color.",
       distance: "2.87 billion km from Sun",
@@ -63,7 +56,7 @@ const SpacePeekCards = () => {
       color: "bg-cyan-400"
     },
     {
-      id: 8,
+      id: 7,
       name: "Neptune",
       description: "The windiest planet in our solar system, with supersonic winds. Neptune is the farthest planet from the Sun.",
       distance: "4.50 billion km from Sun",
@@ -85,7 +78,7 @@ const SpacePeekCards = () => {
   const currentPlanet = planets[currentIndex];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#07173F] flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
         {/* Header */}
         <div className="text-center mb-12">

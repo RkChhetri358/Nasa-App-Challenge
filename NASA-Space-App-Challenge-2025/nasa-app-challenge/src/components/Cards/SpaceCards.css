@@ -1,9 +1,4 @@
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(to bottom, #0f172a, #000, #1e293b);
-  color: white;
-}
+
 
 .cards-container {
   display: flex;

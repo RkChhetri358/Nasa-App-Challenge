@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 
-<<<<<<< HEAD
 const SpacePeekCards = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState('next');
@@ -10,61 +9,60 @@ const SpacePeekCards = () => {
     {
       id: 1,
       name: "Mercury",
-      description: "The smallest and fastest planet in our solar system, Mercury completes an orbit around the Sun every 88 days.",
-      distance: "57.9 million km from Sun",
-      diameter: "4,879 km",
+      description: " Mercury is the smallest and fastest planet in our solar system, It completes an orbit around the Sun in every 88 days and the surface temperatures are both extremely hot and cold. Day temperatures reach (430°C) and night temperatures can dip as low as -290°F (-180°C).",
       color: "bg-gray-400",
-      imageUrl:"https://assets.science.nasa.gov/dynamicimage/assets/science/psd/solar-system/mercury/images/messenger_high_resolution_view_of_mercury_pia_13840.jpg?w=4575&h=4575&fit=clip&crop=faces%2Cfocalpoint"
+      imageUrl:"https://assets.science.nasa.gov/dynamicimage/assets/science/psd/solar-system/mercury/images/mercury_as_mariner_10_sped_away_March_29_1974_PIA02418.jpg?w=775&h=1023&fit=clip&crop=faces%2Cfocalpoint"
     },
     {
       id: 2,
       name: "Venus",
-      description: "The hottest planet in our solar system with a thick toxic atmosphere and surface temperatures hot enough to melt lead.",
+      description: "Venus is the hottest planet in our solar system with a thick toxic atmosphere and surface temperatures hot enough to melt lead.It is our nearest planetary neighbor and is often called Earth's twin because of their similar size and mass.",
       distance: "108.2 million km from Sun",
       diameter: "12,104 km",
-      color: "bg-orange-300"
+      color: "bg-orange-300",
+      imageUrl:"https://assets.science.nasa.gov/dynamicimage/assets/science/psd/solar-system/venus/images/venus_from_nasa_pioneer_1_orbiter.jpg?w=1852&h=1905&fit=clip&crop=faces%2Cfocalpoint"
     },
     
     {
       id: 3,
       name: "Mars",
-      description: "The Red Planet, known for its rusty color caused by iron oxide. Mars has the largest volcano and canyon in the solar system.",
+      description: "Mars is also known as The Red Planet due to its rusty color caused by the presence of iron oxide. Mars has the largest volcano and canyon in the solar system and it is one of the most explored bodies in our solar system.",
       distance: "227.9 million km from Sun",
       diameter: "6,779 km",
-      color: "bg-red-500"
+      color: "bg-red-500",
+      imageUrl:"https://science.nasa.gov/wp-content/uploads/2024/03/pia04304-mars.jpg"
     },
     {
       id: 4,
       name: "Moon",
-      description: "The largest planet in our solar system, a gas giant with a massive storm called the Great Red Spot that's been raging for centuries.",
-      distance: "778.5 million km from Sun",
-      diameter: "139,820 km",
-      color: "bg-amber-600"
+      description: "The Moon is Earth's only natural satellite and the fifth largest moon in the solar system. It has a significant impact on Earth, influencing tides and stabilizing our planet's axial tilt.It is the second-brightest object in the sky after the Sun.",
+      color: "bg-amber-600",
+      imageUrl:"https://images-assets.nasa.gov/image/PIA00405/PIA00405~large.jpg?w=1920&h=1920&fit=clip&crop=faces%2Cfocalpoint"
     },
-    {
-      id: 5,
-      name: "Phobos",
-      description: "Famous for its spectacular ring system made of ice and rock particles. Saturn is the second-largest planet in our solar system.",
-      distance: "1.43 billion km from Sun",
-      diameter: "116,460 km",
-      color: "bg-yellow-600"
-    },
-    {
-      id: 6,
-      name: "Uranus",
-      description: "An ice giant that rotates on its side, making it unique among all the planets. It has a pale blue-green color.",
-      distance: "2.87 billion km from Sun",
-      diameter: "50,724 km",
-      color: "bg-cyan-400"
-    },
-    {
-      id: 7,
-      name: "Neptune",
-      description: "The windiest planet in our solar system, with supersonic winds. Neptune is the farthest planet from the Sun.",
-      distance: "4.50 billion km from Sun",
-      diameter: "49,244 km",
-      color: "bg-blue-700"
-    }
+    // {
+    //   id: 5,
+    //   name: "Phobos",
+    //   description: "Famous for its spectacular ring system made of ice and rock particles. Saturn is the second-largest planet in our solar system.",
+    //   distance: "1.43 billion km from Sun",
+    //   diameter: "116,460 km",
+    //   color: "bg-yellow-600"
+    // },
+    // {
+    //   id: 6,
+    //   name: "Uranus",
+    //   description: "An ice giant that rotates on its side, making it unique among all the planets. It has a pale blue-green color.",
+    //   distance: "2.87 billion km from Sun",
+    //   diameter: "50,724 km",
+    //   color: "bg-cyan-400"
+    // },
+    // {
+    //   id: 7,
+    //   name: "Neptune",
+    //   description: "The windiest planet in our solar system, with supersonic winds. Neptune is the farthest planet from the Sun.",
+    //   distance: "4.50 billion km from Sun",
+    //   diameter: "49,244 km",
+    //   color: "bg-blue-700"
+    // }
   ];
 
   const handleNext = () => {
@@ -78,23 +76,6 @@ const SpacePeekCards = () => {
   };
 
   const currentPlanet = planets[currentIndex];
-=======
-const images = [
-  {
-    id: 1084,
-    thumb: "https://picsum.photos/id/1084/800/400",
-    title: "Nebula Drift",
-    desc: "A colorful nebula with billowing clouds of gas and dust."
-  },
-  {
-    id: 1063,
-    thumb: "https://picsum.photos/id/1063/800/400",
-    title: "Starfield",
-    desc: "A dense starfield — millions of distant suns glittering."
-  }
-];
-//comment
->>>>>>> f64067d6d950b993e8e6a3eda0eb705018e04247
 
   return (
     <div className="min-h-screen bg-[#07173F] flex items-center justify-center p-4">
@@ -131,17 +112,7 @@ const images = [
 
             {/* Planet Info */}
             {/* Comment */}
-            <div className="space-y-3 mb-6">
-              <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                <span className="text-gray-600 font-medium">Distance from Sun</span>
-                <span className="text-gray-900 font-semibold">{currentPlanet.distance}</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                <span className="text-gray-600 font-medium">Diameter</span>
-                <span className="text-gray-900 font-semibold">{currentPlanet.diameter}</span>
-              </div>
-            </div>
-
+            
             {/* Description */}
             <p className="text-gray-600 leading-relaxed mb-8">
               {currentPlanet.description}

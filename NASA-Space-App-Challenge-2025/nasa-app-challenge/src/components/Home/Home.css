@@ -10,7 +10,7 @@
   min-width: 100vw;
   margin: 0;
   padding: 0;
-  overflow:hidden;
+  /* overflow:hidden; */
   /* Gradient overlay + background image */
   background: 
     linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.2)), 

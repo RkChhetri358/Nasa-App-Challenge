@@ -12,25 +12,16 @@ export default function Explore() {
   const [detectMode, setDetectMode] = useState(false);
   const [features, setFeatures] = useState([]);
 
-  const proxy = "http://127.0.0.1:8000/proxy";
+  const proxy = "http://127.0.0.1:8000"; // FastAPI backend
 
   useEffect(() => {
     AOS.init({ duration: 1500 });
   }, []);
 
+  // Run AI Detection
   const runDetection = async () => {
-    const level = 0;
-    const tileUrl =
-      planet === "mars"
-        ? `${proxy}/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0/default/default028mm/${level}/0/0.jpg?detect=true`
-        : planet === "moon"
-        ? `${proxy}/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0/default/default028mm/${level}/0/0/0.jpg?detect=true`
-        : planet === "mercury"
-        ? `${proxy}/Mercury/EQ/Mercury_MESSENGER_MDIS_Basemap_BDR_Mosaic_Global_166m/1.0.0/default/default028mm/${level}/0/0/0.jpg?detect=true`
-        : `${proxy}/Venus/EQ/Venus_Magellan_C3-MDIR_Global_Mosaic_2025m/1.0.0/default/default028mm/${level}/0/0/0.jpg?detect=true`;
-
     try {
-      const response = await fetch(tileUrl);
+      const response = await fetch(`${proxy}/detect/${planet}`);
       const data = await response.json();
       setFeatures(data.features || []);
       alert(`🧠 AI detected ${data.features.length} features!`);
@@ -39,6 +30,7 @@ export default function Explore() {
     }
   };
 
+  // Tile sources for OpenSeadragon
   const tileSources = {
     mars: {
       width: 65536,
@@ -47,7 +39,7 @@ export default function Explore() {
       minLevel: 0,
       maxLevel: 7,
       getTileUrl: (level, x, y) =>
-        `${proxy}/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0/default/default028mm/${level}/${y}/${x}.jpg`,
+        `${proxy}/proxy/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0/default/default028mm/${level}/${y}/${x}.jpg`,
     },
     moon: {
       width: 21600,
@@ -56,7 +48,7 @@ export default function Explore() {
       minLevel: 0,
       maxLevel: 7,
       getTileUrl: (level, x, y) =>
-        `${proxy}/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0/default/default028mm/${level}/${y}/${x}.jpg`,
+        `${proxy}/proxy/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0/default/default028mm/${level}/${y}/${x}.jpg`,
     },
     mercury: {
       width: 98304,
@@ -65,7 +57,7 @@ export default function Explore() {
       minLevel: 0,
       maxLevel: 7,
       getTileUrl: (level, x, y) =>
-        `${proxy}/Mercury/EQ/Mercury_MESSENGER_MDIS_Basemap_BDR_Mosaic_Global_166m/1.0.0/default/default028mm/${level}/${y}/${x}.jpg`,
+        `${proxy}/mercury/2d?level=${level}&x=${x}&y=${y}`, // backend 2D map
     },
     venus: {
       width: 23040,
@@ -74,17 +66,14 @@ export default function Explore() {
       minLevel: 0,
       maxLevel: 7,
       getTileUrl: (level, x, y) =>
-        `${proxy}/Venus/EQ/Venus_Magellan_C3-MDIR_Global_Mosaic_2025m/1.0.0/default/default028mm/${level}/${y}/${x}.jpg`,
+        `${proxy}/proxy/Venus/EQ/Venus_Magellan_C3-MDIR_Global_Mosaic_2025m/1.0.0/default/default028mm/${level}/${y}/${x}.jpg`,
     },
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0b132b] via-[#1c2541] to-[#3a506b] text-white flex flex-col items-center py-10 px-5">
       {/* Header */}
-      <motion.div
-        data-aos="fade-down"
-        className="flex items-center gap-3 mb-6"
-      >
+      <motion.div data-aos="fade-down" className="flex items-center gap-3 mb-6">
         <SiNasa className="text-4xl text-sky-400" />
         <h1 className="text-3xl font-bold tracking-wide">
           Explore <span className="text-sky-300">{planet.toUpperCase()}</span>
@@ -92,18 +81,13 @@ export default function Explore() {
       </motion.div>
 
       {/* Planet Selector */}
-      <motion.div
-        data-aos="fade-right"
-        className="flex gap-3 mb-8 flex-wrap justify-center"
-      >
+      <motion.div data-aos="fade-right" className="flex gap-3 mb-8 flex-wrap justify-center">
         {["mars", "moon", "mercury", "venus"].map((p) => (
           <button
             key={p}
             onClick={() => setPlanet(p)}
             className={`px-5 py-2 rounded-lg font-semibold transition-all duration-300 shadow-md ${
-              planet === p
-                ? "bg-sky-500 hover:bg-sky-400"
-                : "bg-gray-700 hover:bg-gray-600"
+              planet === p ? "bg-sky-500 hover:bg-sky-400" : "bg-gray-700 hover:bg-gray-600"
             }`}
           >
             {p.charAt(0).toUpperCase() + p.slice(1)}
@@ -112,16 +96,11 @@ export default function Explore() {
       </motion.div>
 
       {/* Mode Selector */}
-      <motion.div
-        data-aos="fade-left"
-        className="flex gap-3 mb-8 flex-wrap justify-center"
-      >
+      <motion.div data-aos="fade-left" className="flex gap-3 mb-8 flex-wrap justify-center">
         <button
           onClick={() => setViewMode("2d")}
           className={`flex items-center gap-2 px-5 py-2 rounded-lg font-semibold transition-all ${
-            viewMode === "2d"
-              ? "bg-green-500 hover:bg-green-400"
-              : "bg-gray-700 hover:bg-gray-600"
+            viewMode === "2d" ? "bg-green-500 hover:bg-green-400" : "bg-gray-700 hover:bg-gray-600"
           }`}
         >
           <FaMapMarkedAlt /> 2D Map
@@ -130,9 +109,7 @@ export default function Explore() {
         <button
           onClick={() => setViewMode("3d")}
           className={`flex items-center gap-2 px-5 py-2 rounded-lg font-semibold transition-all ${
-            viewMode === "3d"
-              ? "bg-green-500 hover:bg-green-400"
-              : "bg-gray-700 hover:bg-gray-600"
+            viewMode === "3d" ? "bg-green-500 hover:bg-green-400" : "bg-gray-700 hover:bg-gray-600"
           }`}
         >
           <FaGlobe /> 3D Globe
@@ -142,9 +119,7 @@ export default function Explore() {
           <button
             onClick={() => setDetectMode(!detectMode)}
             className={`flex items-center gap-2 px-5 py-2 rounded-lg font-semibold transition-all ${
-              detectMode
-                ? "bg-red-600 hover:bg-red-500"
-                : "bg-yellow-500 hover:bg-yellow-400"
+              detectMode ? "bg-red-600 hover:bg-red-500" : "bg-yellow-500 hover:bg-yellow-400"
             }`}
           >
             <FaRobot />
@@ -162,6 +137,14 @@ export default function Explore() {
           <OpenSeadragonViewer
             tileSource={tileSources[planet]}
             features={detectMode ? features : []}
+          />
+        ) : planet === "mercury" ? (
+          <iframe
+            src={`${proxy}/mercury/3d`} // backend 3D
+            width="100%"
+            height="100%"
+            style={{ border: "none" }}
+            allowFullScreen
           />
         ) : (
           <iframe
@@ -181,8 +164,7 @@ export default function Explore() {
           onClick={runDetection}
           className="mt-8 px-6 py-3 bg-orange-500 hover:bg-orange-400 text-white rounded-lg font-semibold shadow-lg flex items-center gap-2"
         >
-          <FaRobot />
-          Run AI Detection
+          <FaRobot /> Run AI Detection
         </motion.button>
       )}
 

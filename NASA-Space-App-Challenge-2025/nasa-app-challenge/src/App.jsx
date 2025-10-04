@@ -13,12 +13,17 @@ export default function App() {
       <Routes>
         <Route path="/" element={<>
           <Home />
-          {/* <SpacePeekCards />
-          <Footer /> */}
+         
         </>} />
         
         <Route path="/explore" element={<Explore />} />
       </Routes>
+    <div>
+       <SpacePeekCards />
+          <Footer />
+
+    </div>
+
     </div>
   );
 }

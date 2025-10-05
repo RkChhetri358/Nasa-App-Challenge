@@ -60,9 +60,9 @@ const Navbar = () => {
                 <ul className="navbar-list">
                     <li className="navbar-item "><Link to="/" style={{ color: "inherit", textDecoration: "none", display: "flex", alignItems: "center", gap: "0.5em" }}
                     > <FaHome className="mr-2"/>Home</Link></li>
-                    <li className="navbar-item "><Link to='/explore' style={{ color: "inherit", textDecoration: "none", display: "flex", alignItems: "center", gap: "0.5em" }}>
+                    <li className="navbar-item "><Link to='/SpacePeekCards' style={{ color: "inherit", textDecoration: "none", display: "flex", alignItems: "center", gap: "0.5em" }}>
                     <IoTelescope className="mr-2" />Explore</Link></li>
-                    <li className="navbar-item "><Link to='#' style={{ color: "inherit", textDecoration: "none", display: "flex", alignItems: "center", gap: "0.5em" }}>
+                    <li className="navbar-item "><Link to='/about' style={{ color: "inherit", textDecoration: "none", display: "flex", alignItems: "center", gap: "0.5em" }}>
                     <IoMdInformationCircleOutline className="mr-2" />About Us</Link></li>
                 </ul>
             </div>

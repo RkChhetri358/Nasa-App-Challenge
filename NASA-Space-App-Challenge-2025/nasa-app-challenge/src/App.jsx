@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar/Navbar";
 import SpacePeekCards from "./components/Cards/SpacePeekCards";
 import Footer from "./components/Footer/Footer";
 import Explore from "./components/Explore/Explore";
+import About from "./components/About/About";
 
 export default function App() {
   return (
@@ -18,9 +19,11 @@ export default function App() {
         
         <Route path="/explore" element={<Explore />} />
         <Route path="/SpacePeekCards" element={<SpacePeekCards />} />
+        <Route path="/about" element={<About/>} />
 
       </Routes>
- <SpacePeekCards />
+ {/* <SpacePeekCards /> */}
+ 
           <Footer />      
     </div>
   );

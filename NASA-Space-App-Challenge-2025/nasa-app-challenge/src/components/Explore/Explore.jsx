@@ -9,11 +9,12 @@ import { SiNasa } from "react-icons/si";
 export default function Explore() {
   const [planet, setPlanet] = useState("mercury");
   const [viewMode, setViewMode] = useState("2d");
+  const [features, setFeatures] = useState([]);
   const proxy = "http://127.0.0.1:8000";
 
   const tileSources = {
     mercury: {
-      width: 98304, // Full image width approx for zoom 3
+      width: 98304,
       height: 49152,
       tileSize: 256,
       minLevel: 0,
@@ -24,7 +25,18 @@ export default function Explore() {
 
   useEffect(() => {
     AOS.init({ duration: 1500 });
+    fetch(`${proxy}/mercury/labels?limit=500`)
+      .then((res) => res.json())
+      .then((data) => setFeatures(data))
+      .catch(() => console.error("Failed to load features"));
   }, []);
+
+  // Send feature search to 3D globe
+  const sendToGlobe = (feature) => {
+    const iframe = document.getElementById("globe-iframe");
+    if (!iframe) return;
+    iframe.contentWindow.postMessage({ type: "goto-feature", feature }, "*");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0b132b] via-[#1c2541] to-[#3a506b] text-white flex flex-col items-center py-10 px-5">
@@ -54,107 +66,54 @@ export default function Explore() {
           <FaGlobe /> 3D Globe
         </button>
       </motion.div>
-          <motion.div data-aos="fade-up" className="mb-6 w-full max-w-2xl flex justify-center">
-            <input
-              type="text"
-              placeholder="Search feature or coordinates (e.g. Caloris Basin or 23.5,45.2)"
-              className="w-full px-4 py-2 rounded-l-lg bg-gray-800 text-white focus:outline-none"
-              onKeyDown={async (e) => {
-                if (e.key === "Enter") {
-                  const query = e.target.value.trim();
-                  if (!query) return;
 
-                  // Example: If coordinates entered as "lat,lon"
-                  const coordMatch = query.match(/^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/);
-                  if (coordMatch) {
-                    const lat = parseFloat(coordMatch[1]);
-                    const lon = parseFloat(coordMatch[3]);
-                    // Convert lat/lon to image coordinates (dummy example, replace with real conversion)
-                    // For Mercury, let's assume equirectangular projection
-                    const { width, height } = tileSources[planet];
-                    const x = ((lon + 180) / 360) * width;
-                    const y = ((90 - lat) / 180) * height;
-                    window.dispatchEvent(
-                      new CustomEvent("osd-goto", { detail: { x, y, zoom: 1.5 } })
-                    );
-                    return;
-                  }
+      <motion.div data-aos="fade-up" className="mb-6 w-full max-w-2xl flex justify-center">
+        <input
+          type="text"
+          placeholder="Search feature or coordinates (e.g. Caloris Basin or 23.5,45.2)"
+          className="w-full px-4 py-2 rounded-l-lg bg-gray-800 text-white focus:outline-none"
+          onKeyDown={async (e) => {
+            if (e.key !== "Enter") return;
+            const query = e.target.value.trim();
+            if (!query) return;
 
-                  // Otherwise, treat as feature name: fetch coordinates from backend
-                  try {
-                    const res = await fetch(`${proxy}/mercury/features/search?q=${encodeURIComponent(query)}`);
-                    if (res.ok) {
-                      const data = await res.json();
-                      if (data && data.x !== undefined && data.y !== undefined) {
-                        window.dispatchEvent(
-                          new CustomEvent("osd-goto", { detail: { x: data.x, y: data.y, zoom: 2 } })
-                        );
-                      } else {
-                        alert("Feature not found.");
-                      }
-                    } else {
-                      alert("Feature not found.");
-                    }
-                  } catch {
-                    alert("Error searching for feature.");
-                  }
-                }
-              }}
-            />
-            <button
-              className="px-4 py-2 rounded-r-lg bg-sky-600 hover:bg-sky-500 text-white font-semibold"
-              onClick={async () => {
-                const input = document.querySelector("input[placeholder^='Search feature']");
-                if (!input) return;
-                const query = input.value.trim();
-                if (!query) return;
+            const coordMatch = query.match(/^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/);
+            if (coordMatch) {
+              const lat = parseFloat(coordMatch[1]);
+              const lon = parseFloat(coordMatch[3]);
+              if (viewMode === "2d") {
+                window.dispatchEvent(
+                  new CustomEvent("osd-goto", { detail: { x: lon, y: lat, zoom: 2 } })
+                );
+              } else sendToGlobe({ lat, lon });
+              return;
+            }
 
-                const coordMatch = query.match(/^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/);
-                if (coordMatch) {
-                  const lat = parseFloat(coordMatch[1]);
-                  const lon = parseFloat(coordMatch[3]);
-                  const { width, height } = tileSources[planet];
-                  const x = ((lon + 180) / 360) * width;
-                  const y = ((90 - lat) / 180) * height;
-                  window.dispatchEvent(
-                    new CustomEvent("osd-goto", { detail: { x, y, zoom: 1.5 } })
-                  );
-                  return;
-                }
+            try {
+              const res = await fetch(`${proxy}/mercury/labels/${encodeURIComponent(query)}`);
+              if (!res.ok) throw new Error();
+              const data = await res.json();
+              if (viewMode === "2d") {
+                window.dispatchEvent(
+                  new CustomEvent("osd-goto", { detail: { x: data.lon, y: data.lat, zoom: 2 } })
+                );
+              } else sendToGlobe(data);
+            } catch {
+              alert("Feature not found.");
+            }
+          }}
+        />
+      </motion.div>
 
-                try {
-                  const res = await fetch(`${proxy}/mercury/features/search?q=${encodeURIComponent(query)}`);
-                  if (res.ok) {
-                    const data = await res.json();
-                    if (data && data.x !== undefined && data.y !== undefined) {
-                      window.dispatchEvent(
-                        new CustomEvent("osd-goto", { detail: { x: data.x, y: data.y, zoom: 2 } })
-                      );
-                    } else {
-                      alert("Feature not found.");
-                    }
-                  } else {
-                    alert("Feature not found.");
-                  }
-                } catch {
-                  alert("Error searching for feature.");
-                }
-              }}
-            >
-              Search
-            </button>
-          </motion.div>
       <motion.div
         data-aos="zoom-in"
         className="w-full max-w-6xl h-[600px] rounded-xl overflow-hidden shadow-2xl border border-gray-700"
       >
-
-
-
         {viewMode === "2d" ? (
-          <OpenSeadragonViewer tileSource={tileSources[planet]} features={[]} />
+          <OpenSeadragonViewer tileSource={tileSources[planet]} features={features} />
         ) : (
           <iframe
+            id="globe-iframe"
             src={`${proxy}/mercury/3d`}
             width="100%"
             height="100%"
@@ -164,7 +123,9 @@ export default function Explore() {
         )}
       </motion.div>
 
-   
+      <footer className="mt-10 text-gray-400 text-sm">
+        <p>Powered by NASA & AI — Built with ❤️</p>
+      </footer>
     </div>
   );
 }

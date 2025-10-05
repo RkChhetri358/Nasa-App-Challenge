@@ -1,6 +1,7 @@
+
 .footer {
   position: relative;
-  background: radial-gradient(circle at 50% 50%, #0b0c2c 0%, #000000 100%);
+ background-color: #0A0A10;
   color: white;
   text-align: center;
   padding: 100px 20px 60px;
@@ -12,18 +13,18 @@
 .footer-content h2 {
   font-size: 28px;
   margin-bottom: 10px;
-  color: #00ffff;
-  text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 40px #00ffff;
+  color: #ffffff;
+  /* text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 40px #00ffff; */
 }
 
 .footer-content p {
-  margin-bottom: 20px;
+  margin-bottom: 1em;
   font-size: 14px;
   color: #ffffffaa;
 }
 
 .links a {
-  color: #ff77ff;
+  color: #2E96F5;
   margin: 0 15px;
   text-decoration: none;
   font-weight: 500;
@@ -79,18 +80,18 @@
 }
 
 .planet1 {
-  width: 120px;
-  height: 120px;
-  background: radial-gradient(circle, #ff66cc, #9900ff);
+  width: 90px;
+  height: 70px;
+  background: radial-gradient(circle, #ffffff, #ce93f5);
   top: 20%;
   left: 10%;
   animation-duration: 18s;
 }
 
 .planet2 {
-  width: 80px;
+  width: 90px;
   height: 80px;
-  background: radial-gradient(circle, #00ffff, #0077ff);
+  background: radial-gradient(circle, #7e9494, #a9cdf7);
   bottom: 15%;
   right: 15%;
   animation-duration: 25s;

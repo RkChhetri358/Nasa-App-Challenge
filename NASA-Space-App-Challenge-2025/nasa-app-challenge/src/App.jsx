@@ -17,10 +17,11 @@ export default function App() {
         </>} />
         
         <Route path="/explore" element={<Explore />} />
+        <Route path="/SpacePeekCards" element={<SpacePeekCards />} />
 
       </Routes>
  <SpacePeekCards />
-          {/* <Footer />       */}
+          <Footer />      
     </div>
   );
 }

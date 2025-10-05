@@ -1,11 +1,12 @@
-# backend/main.py
-
-from fastapi import FastAPI, Response, HTMLResponse, Query
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, Query
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-import os, io, requests
+from typing import Optional
 from PIL import Image
-from moon_visualizer import MoonVisualizer
+import os, io
+
+from mercury_visualizer import MercuryVisualizer
+
 
 app = FastAPI()
 
@@ -17,65 +18,134 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# === Project root ===
+# === Paths ===
 CURRENT_FILE = os.path.abspath(__file__)
 PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_FILE, ".."))
+TILE_DIR = os.path.join(PROJECT_ROOT, "tiles")
+os.makedirs(TILE_DIR, exist_ok=True)
 
-# === Moon visualizer instance ===
-moon_vis = MoonVisualizer(
-    proxy="http://127.0.0.1:8000/proxy",  # can also directly use NASA tiles if proxy not needed
-    layer="Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0/default/default028mm",
-    shapefile_path=os.path.join(PROJECT_ROOT, "MoonData", "MOON_nomenclature_center_pts.shp"),
-    zoom=3,
-    min_diameter=50,
-    max_labels=500
+# === Mercury visualizer ===
+mercury_vis = MercuryVisualizer(
+    proxy="https://trek.nasa.gov/tiles",
+    layer="Mercury/EQ/Mercury_MESSENGER_MDIS_Basemap_BDR_Mosaic_Global_166m/1.0.0/default/default028mm",
+    shapefile_path=os.path.join(PROJECT_ROOT, "MercuryData", "MERCURY_nomenclature_center_pts.shp"),
+    zoom=3
 )
 
-# === Preload basemap on startup (synchronous) ===
+# === Startup: preload basemap ===
 @app.on_event("startup")
-def preload_moon():
-    print("🚀 Preloading Moon basemap...")
-    moon_vis.fetch_basemap()
-    print("✅ Moon basemap cached successfully!")
+async def preload_mercury():
+    mercury_vis.fetch_basemap()
+    print("✅ Mercury basemap preloaded and cached")
 
-# === Root endpoint ===
+# === Root ===
 @app.get("/")
-def root():
+async def root():
     return {"message": "NASA Space App Backend running!"}
 
-# === 2D Moon image endpoint ===
-@app.get("/moon/2d")
-def moon_2d():
-    buf = moon_vis.generate_2d()
-    return StreamingResponse(buf, media_type="image/jpeg")
+# === 3D endpoint ===
+@app.get("/mercury/3d")
+async def mercury_3d():
+    html = mercury_vis.generate_3d_html()
+    return HTMLResponse(html)
 
-# === Moon labels endpoint ===
-@app.get("/moon/labels")
-def moon_labels(limit: int = Query(500, description="Max number of labels")):
-    features = []
-    for _, row in moon_vis.gdf.head(limit).iterrows():
-        features.append({
-            "name": row.get("name"),
-            "type": row.get("type"),
-            "diameter": float(row.get("diameter")) if row.get("diameter") else None,
-            "lon": float(row.get("center_lon")),
-            "lat": float(row.get("center_lat")),
-        })
-    return {"labels": features}
-
-# === Proxy endpoint for tiles ===
-@app.get("/proxy/{planet}/{rest_of_path:path}")
-def proxy_tile(planet: str, rest_of_path: str):
-    nasa_base_url = "https://trek.nasa.gov/tiles"
-    tile_url = f"{nasa_base_url}/{planet}/{rest_of_path}"
-
-    print(f"Fetching tile: {tile_url}")
-    r = requests.get(tile_url)
-    if r.status_code == 200:
-        return Response(content=r.content, media_type="image/jpeg", headers={"Access-Control-Allow-Origin": "*"})
+# === Tiles endpoint ===
+@app.get("/mercury/tiles/{level}/{y}/{x}.jpg")
+async def get_tile(level: int, y: int, x: int):
+    tile_path = os.path.join(TILE_DIR, str(level), str(y), f"{x}.jpg")
+    if os.path.exists(tile_path):
+        return FileResponse(tile_path)
     
-    return Response(
-        content=f"Tile not found: {tile_url}",
-        status_code=404,
-        headers={"Access-Control-Allow-Origin": "*"}
-    )
+    # Generate tile dynamically
+    full_img, _ = mercury_vis.fetch_basemap()
+    tile_size = 256
+    num_tiles = 2 ** level
+    w, h = full_img.size
+    scale = w / (2 ** mercury_vis.zoom * tile_size)  # scale full image to desired level
+
+    left = int(x * tile_size * scale)
+    upper = int(y * tile_size * scale)
+    right = int(min(left + tile_size * scale, w))
+    lower = int(min(upper + tile_size * scale, h))
+
+    tile = full_img.crop((left, upper, right, lower)).resize((tile_size, tile_size), Image.LANCZOS)
+    os.makedirs(os.path.dirname(tile_path), exist_ok=True)
+    tile.save(tile_path, "JPEG")
+    return FileResponse(tile_path)
+
+
+
+
+
+
+@app.get("/mercury/labels")
+async def get_all_labels(limit: Optional[int] = Query(100, ge=1, le=1000)):
+    """Return crater/feature labels (name, lat, lon, diameter)."""
+    gdf = mercury_vis.gdf.head(limit)
+    labels = [
+        {
+            "name": str(row.get("name", "Unnamed")),
+            "type": str(row.get("feature_type", "Unknown")),
+            "diameter": float(row.get("diameter", 0.0)),
+            "lon": float(row.get("center_lon", 0.0)),
+            "lat": float(row.get("center_lat", 0.0)),
+        }
+        for _, row in gdf.iterrows()
+    ]
+    return JSONResponse(labels)
+
+# === 2. Get a label by name ===
+@app.get("/mercury/labels/{name}")
+async def get_label_by_name(name: str):
+    """Return details of a specific labeled feature by name (case-insensitive)."""
+    match = mercury_vis.gdf[mercury_vis.gdf["name"].str.lower() == name.lower()]
+    if match.empty:
+        return JSONResponse({"error": "Label not found"}, status_code=404)
+    row = match.iloc[0]
+    label = {
+        "name": str(row.get("name", "Unnamed")),
+        "type": str(row.get("feature_type", "Unknown")),
+        "diameter": float(row.get("diameter", 0.0)),
+        "lon": float(row.get("center_lon", 0.0)),
+        "lat": float(row.get("center_lat", 0.0)),
+    }
+    return JSONResponse(label)
+
+# === 3. Filter labels by diameter or region ===
+@app.get("/mercury/labels/filter")
+async def filter_labels(
+    min_diameter: float = Query(0),
+    max_diameter: float = Query(1e6),
+    min_lat: Optional[float] = None,
+    max_lat: Optional[float] = None,
+    min_lon: Optional[float] = None,
+    max_lon: Optional[float] = None
+):
+    """Filter labels based on diameter and optional coordinate bounds."""
+    gdf = mercury_vis.gdf
+    gdf_filtered = gdf[
+        (gdf["diameter"].astype(float) >= min_diameter)
+        & (gdf["diameter"].astype(float) <= max_diameter)
+    ]
+
+    if None not in (min_lat, max_lat):
+        gdf_filtered = gdf_filtered[
+            (gdf_filtered["center_lat"] >= min_lat) & (gdf_filtered["center_lat"] <= max_lat)
+        ]
+    if None not in (min_lon, max_lon):
+        gdf_filtered = gdf_filtered[
+            (gdf_filtered["center_lon"] >= min_lon) & (gdf_filtered["center_lon"] <= max_lon)
+        ]
+
+    labels = [
+        {
+            "name": str(row.get("name", "Unnamed")),
+            "type": str(row.get("feature_type", "Unknown")),
+            "diameter": float(row.get("diameter", 0.0)),
+            "lon": float(row.get("center_lon", 0.0)),
+            "lat": float(row.get("center_lat", 0.0)),
+        }
+        for _, row in gdf_filtered.iterrows()
+    ]
+
+    return JSONResponse(labels)

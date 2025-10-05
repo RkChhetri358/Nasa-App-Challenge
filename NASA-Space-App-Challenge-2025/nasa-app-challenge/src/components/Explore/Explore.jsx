@@ -3,53 +3,49 @@ import { motion } from "framer-motion";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import OpenSeadragonViewer from "../OpenSeadragon/OpenSeadragonViewer";
-import { FaRobot, FaGlobe, FaMapMarkedAlt } from "react-icons/fa";
+import { FaGlobe, FaMapMarkedAlt } from "react-icons/fa";
 import { SiNasa } from "react-icons/si";
 
 export default function Explore() {
-  const [planet, setPlanet] = useState("moon");
+  const [planet, setPlanet] = useState("mercury");
   const [viewMode, setViewMode] = useState("2d");
-  const [detectMode, setDetectMode] = useState(false);
   const [features, setFeatures] = useState([]);
-
   const proxy = "http://127.0.0.1:8000";
 
-  useEffect(() => {
-    AOS.init({ duration: 1500 });
-  }, []);
+  // Supported planets
+  const planets = ["mercury", "venus", "moon", "mars"];
 
-  // Run detection (fetch labels)
-  const runDetection = async () => {
-    try {
-      const response = await fetch(`${proxy}/detect/${planet}`);
-      const data = await response.json();
-      setFeatures(data.features || []);
-      alert(`🧠 AI detected ${data.features.length} features!`);
-    } catch (err) {
-      console.error("Detection failed:", err);
-    }
-  };
-
-  // Tile sources
-  const tileSources = {
-    moon: {
-      width: 21600,
-      height: 10800,
-      tileSize: 256,
-      minLevel: 0,
-      maxLevel: 7,
-      getTileUrl: (level, x, y) =>
-        `${proxy}/proxy/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0/default/default028mm/${level}/${y}/${x}.jpg`,
-    },
-    mercury: {
-      width: 98304,
+  // Dynamically construct tileSources for planets
+  const tileSources = planets.reduce((acc, p) => {
+    acc[p] = {
+      width: 98304, // adjust if needed per planet
       height: 49152,
       tileSize: 256,
       minLevel: 0,
       maxLevel: 7,
       getTileUrl: (level, x, y) =>
-        `${proxy}/mercury/2d?level=${level}&x=${x}&y=${y}`,
-    },
+        `${proxy}/proxy/${p.charAt(0).toUpperCase() + p.slice(1)}/EQ/${p
+          .charAt(0)
+          .toUpperCase() + p.slice(1)}_MESSENGER_MDIS_Basemap_BDR_Mosaic_Global_166m/1.0.0/default/default028mm/${level}/${y}/${x}.jpg`,
+    };
+    return acc;
+  }, {});
+
+  useEffect(() => {
+    AOS.init({ duration: 1500 });
+    fetchLabels();
+  }, [planet]);
+
+  // Fetch feature/crater labels from backend
+  const fetchLabels = async () => {
+    try {
+      const res = await fetch(`${proxy}/${planet}/labels`);
+      const data = await res.json();
+      setFeatures(data); // backend returns an array
+      console.log(`✅ Loaded ${data.length} ${planet} features`);
+    } catch (err) {
+      console.error("Failed to fetch labels:", err);
+    }
   };
 
   return (
@@ -61,20 +57,22 @@ export default function Explore() {
         </h1>
       </motion.div>
 
-      <motion.div data-aos="fade-right" className="flex gap-3 mb-8 flex-wrap justify-center">
-        {["moon", "mercury"].map((p) => (
+      {/* Planet Selector */}
+      <motion.div data-aos="fade-left" className="flex gap-3 mb-8 flex-wrap justify-center">
+        {planets.map((p) => (
           <button
             key={p}
             onClick={() => setPlanet(p)}
-            className={`px-5 py-2 rounded-lg font-semibold transition-all duration-300 shadow-md ${
-              planet === p ? "bg-sky-500 hover:bg-sky-400" : "bg-gray-700 hover:bg-gray-600"
+            className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+              planet === p ? "bg-green-500 hover:bg-green-400" : "bg-gray-700 hover:bg-gray-600"
             }`}
           >
-            {p.charAt(0).toUpperCase() + p.slice(1)}
+            {p.toUpperCase()}
           </button>
         ))}
       </motion.div>
 
+      {/* View Mode Toggle */}
       <motion.div data-aos="fade-left" className="flex gap-3 mb-8 flex-wrap justify-center">
         <button
           onClick={() => setViewMode("2d")}
@@ -93,36 +91,15 @@ export default function Explore() {
         >
           <FaGlobe /> 3D Globe
         </button>
-
-        {viewMode === "2d" && (
-          <button
-            onClick={() => setDetectMode(!detectMode)}
-            className={`flex items-center gap-2 px-5 py-2 rounded-lg font-semibold transition-all ${
-              detectMode ? "bg-red-600 hover:bg-red-500" : "bg-yellow-500 hover:bg-yellow-400"
-            }`}
-          >
-            <FaRobot /> {detectMode ? "Stop Detection" : "Detect Features"}
-          </button>
-        )}
       </motion.div>
 
-      <motion.div
-        data-aos="zoom-in"
-        className="w-full max-w-6xl h-[600px] rounded-xl overflow-hidden shadow-2xl border border-gray-700"
-      >
+      {/* Viewer */}
+      <motion.div data-aos="zoom-in" className="w-full max-w-6xl h-[600px] rounded-xl overflow-hidden shadow-2xl border border-gray-700">
         {viewMode === "2d" ? (
-          <OpenSeadragonViewer tileSource={tileSources[planet]} features={detectMode ? features : []} />
-        ) : planet === "mercury" ? (
-          <iframe
-            src={`${proxy}/mercury/3d`}
-            width="100%"
-            height="100%"
-            style={{ border: "none" }}
-            allowFullScreen
-          />
+          <OpenSeadragonViewer tileSource={tileSources[planet]} features={features} />
         ) : (
           <iframe
-            src={`${proxy}/moon/3d`}
+            src={`${proxy}/${planet}/3d?with_labels=true`}
             width="100%"
             height="100%"
             style={{ border: "none" }}
@@ -131,18 +108,8 @@ export default function Explore() {
         )}
       </motion.div>
 
-      {detectMode && (
-        <motion.button
-          data-aos="fade-up"
-          onClick={runDetection}
-          className="mt-8 px-6 py-3 bg-orange-500 hover:bg-orange-400 text-white rounded-lg font-semibold shadow-lg flex items-center gap-2"
-        >
-          <FaRobot /> Run AI Detection
-        </motion.button>
-      )}
-
       <footer className="mt-10 text-gray-400 text-sm">
-        <p>Powered by NASA & AI — Built with ❤️</p>
+        <p>Powered by NASA & AI — Built with ❤</p>
       </footer>
     </div>
   );

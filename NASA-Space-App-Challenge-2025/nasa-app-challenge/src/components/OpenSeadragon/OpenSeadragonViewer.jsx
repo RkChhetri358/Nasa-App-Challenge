@@ -33,7 +33,7 @@ export default function OpenSeadragonViewer({ tileSource, features = [] }) {
       maxZoomPixelRatio: 2,
       visibilityRatio: 1,
       constrainDuringPan: true,
-      timeout: 60000,
+      timeout: 1200000,
       imageLoaderLimit: 3,
       tileSources: {
         width: tileSource.width,

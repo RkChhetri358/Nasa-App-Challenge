@@ -1,5 +1,3 @@
-
-
 import requests, io, os
 from PIL import Image
 import geopandas as gpd
@@ -30,14 +28,14 @@ class MercuryVisualizer:
     # ----------------------
     def fetch_basemap(self):
         if self._cached_full_img is not None:
-            return self._cached_full_img, self._cached_gray_img, self._cached_labels
+            return self._cached_full_img, self._cached_gray_img
 
         tile_size = 256
         num_tiles = 2 ** self.zoom
+        # Full image size = num_tiles * tile_size
         full_img = Image.new("RGB", (num_tiles * tile_size, num_tiles * tile_size))
 
         print(f"Fetching {num_tiles} × {num_tiles} tiles at zoom {self.zoom}...")
-
         for x in range(num_tiles):
             for y in range(num_tiles):
                 url = f"{self.proxy}/{self.layer}/{self.zoom}/{y}/{x}.jpg"
@@ -48,25 +46,17 @@ class MercuryVisualizer:
                 else:
                     print(f"⚠ Missing tile: {url}")
 
-        # Resize preview for better performance (optional)
-        max_w, max_h = 2000, 1000
-        img_resized = full_img.resize((max_w, max_h), Image.LANCZOS)
-
-        print(f"✅ Using {len(self.gdf)} features for labeling")
-
-        # Cache full image and grayscale array
+        # Cache full image at native resolution
         gray_img = np.array(full_img.convert("L"))
         self._cached_full_img = full_img
         self._cached_gray_img = gray_img
-        self._cached_labels = self.gdf
-
-        return full_img, gray_img, self.gdf
+        return full_img, gray_img
 
     # ----------------------
     # 2. GENERATE 2D IMAGE (JPEG)
     # ----------------------
     def generate_2d(self):
-        full_img, _, _ = self.fetch_basemap()
+        full_img, _ = self.fetch_basemap()
         buf = io.BytesIO()
         full_img.save(buf, format="JPEG")
         buf.seek(0)
@@ -76,12 +66,12 @@ class MercuryVisualizer:
     # 3. GENERATE 3D GLOBE (HTML)
     # ----------------------
     def generate_3d_html(self):
-        _, gray_img, _ = self.fetch_basemap()
+        _, gray_img = self.fetch_basemap()
         h, w = gray_img.shape
 
         # Sphere coordinates
         phi = np.linspace(0, np.pi, h)
-        theta = np.linspace(0, 2 * np.pi, w)
+        theta = np.linspace(0, 2*np.pi, w)
         theta, phi = np.meshgrid(theta, phi)
 
         x = np.cos(theta) * np.sin(phi)
@@ -108,10 +98,7 @@ class MercuryVisualizer:
         # Feature labels
         labels = []
         for _, row in self.gdf.iterrows():
-            lon, lat = row.get("center_lon"), row.get("center_lat")
-            if lon is None or lat is None:
-                continue
-
+            lon, lat = row["center_lon"], row["center_lat"]
             if lon > 180:
                 lon -= 360
             lon_rad = np.deg2rad(lon)
@@ -125,7 +112,7 @@ class MercuryVisualizer:
                 x=[lx], y=[ly], z=[lz],
                 mode="markers+text",
                 marker=dict(size=3, color="red"),
-                text=[row.get("name", "Unnamed")],
+                text=[row["name"]],
                 textposition="top center",
                 textfont=dict(size=9, color="yellow")
             ))

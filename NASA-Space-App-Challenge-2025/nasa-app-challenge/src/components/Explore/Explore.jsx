@@ -10,6 +10,8 @@ export default function Explore() {
   const [planet, setPlanet] = useState("mercury");
   const [viewMode, setViewMode] = useState("2d");
   const [features, setFeatures] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const proxy = "http://127.0.0.1:8000";
 
   const tileSources = {
@@ -31,11 +33,56 @@ export default function Explore() {
       .catch(() => console.error("Failed to load features"));
   }, []);
 
-  // Send feature search to 3D globe
   const sendToGlobe = (feature) => {
     const iframe = document.getElementById("globe-iframe");
     if (!iframe) return;
     iframe.contentWindow.postMessage({ type: "goto-feature", feature }, "*");
+  };
+
+  const handleSearch = async (query) => {
+    setSearchQuery(query);
+    if (!query) return;
+
+    // Detect coordinates
+    const coordMatch = query.match(/^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/);
+    if (coordMatch) {
+      const lat = parseFloat(coordMatch[1]);
+      const lon = parseFloat(coordMatch[3]);
+      if (viewMode === "2d") {
+        window.dispatchEvent(
+          new CustomEvent("osd-goto", { detail: { x: lon, y: lat, zoom: 2 } })
+        );
+      } else sendToGlobe({ lat, lon });
+      setSearchResults([]);
+      return;
+    }
+
+    // Search via Flask API
+    try {
+      const res = await fetch(`${proxy}/search/?q=${encodeURIComponent(query)}`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (!data.results || data.results.length === 0) {
+        setSearchResults([]);
+        alert("No matching features found.");
+        return;
+      }
+      setSearchResults(data.results);
+    } catch (err) {
+      console.error(err);
+      alert("Search failed.");
+    }
+  };
+
+  const selectFeature = (feature) => {
+    const [lat, lon] = feature.coordinates;
+    if (viewMode === "2d") {
+      window.dispatchEvent(
+        new CustomEvent("osd-goto", { detail: { x: lon, y: lat, zoom: 2 } })
+      );
+    } else sendToGlobe({ ...feature, lat, lon });
+    setSearchResults([]);
+    setSearchQuery("");
   };
 
   return (
@@ -67,42 +114,28 @@ export default function Explore() {
         </button>
       </motion.div>
 
-      <motion.div data-aos="fade-up" className="mb-6 w-full max-w-2xl flex justify-center">
+      <motion.div data-aos="fade-up" className="mb-6 w-full max-w-2xl flex flex-col relative">
         <input
           type="text"
           placeholder="Search feature or coordinates (e.g. Caloris Basin or 23.5,45.2)"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSearch(searchQuery)}
           className="w-full px-4 py-2 rounded-l-lg bg-gray-800 text-white focus:outline-none"
-          onKeyDown={async (e) => {
-            if (e.key !== "Enter") return;
-            const query = e.target.value.trim();
-            if (!query) return;
-
-            const coordMatch = query.match(/^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/);
-            if (coordMatch) {
-              const lat = parseFloat(coordMatch[1]);
-              const lon = parseFloat(coordMatch[3]);
-              if (viewMode === "2d") {
-                window.dispatchEvent(
-                  new CustomEvent("osd-goto", { detail: { x: lon, y: lat, zoom: 2 } })
-                );
-              } else sendToGlobe({ lat, lon });
-              return;
-            }
-
-            try {
-              const res = await fetch(`${proxy}/mercury/labels/${encodeURIComponent(query)}`);
-              if (!res.ok) throw new Error();
-              const data = await res.json();
-              if (viewMode === "2d") {
-                window.dispatchEvent(
-                  new CustomEvent("osd-goto", { detail: { x: data.lon, y: data.lat, zoom: 2 } })
-                );
-              } else sendToGlobe(data);
-            } catch {
-              alert("Feature not found.");
-            }
-          }}
         />
+        {searchResults.length > 0 && (
+          <ul className="absolute top-full left-0 w-full bg-gray-900 border border-gray-700 rounded-b-lg max-h-60 overflow-auto z-50">
+            {searchResults.map((f, i) => (
+              <li
+                key={i}
+                onClick={() => selectFeature(f)}
+                className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-sm"
+              >
+                {f.name} {f.diameter ? `— ${f.diameter} km` : ""}
+              </li>
+            ))}
+          </ul>
+        )}
       </motion.div>
 
       <motion.div

@@ -1,12 +1,17 @@
-
 import React from 'react';
 import './About.css';
 
 const teamMembers = [
   {
+    name: 'Rahul Adhikari',
+    role: 'Content and Presentation Lead',
+    bio: 'Leads the creation and delivery of clear, impactful content and presentations.',
+  },
+  {
     name: 'Rachit Khadka',
     role: 'Full Stack Developer',
-    bio: 'Experienced in developing scalable web applications across both frontend and backend environments. ',
+    bio: 'Knowledge on developing scalable web applications across both frontend and backend environments.',
+    photo: ''
   },
   {
     name: 'Prinsa Neupane',
@@ -16,12 +21,12 @@ const teamMembers = [
   {
     name: 'Pratyush Badal',
     role: 'Backend Developer',
-    bio: 'Specializes in building secure, efficient server-side systems and managing data integrations.',
+    bio: ' Efficient on server-side systems and managing data integrations.',
   },
   {
-    name: 'Rahul Adhikari',
-    role: 'Content and Presentation Lead',
-    bio: ' Leads the creation and delivery of clear, impactful content and presentations.',
+    name: 'Bibek Bikram Shahi',
+    role: 'Machine Learning Specialist',
+    bio: 'Expert in developing algorithms and models to analyze complex data sets and drive insights.',
   },
 ];
 
@@ -47,4 +52,3 @@ const About = () => {
 };
 
 export default About;
-    

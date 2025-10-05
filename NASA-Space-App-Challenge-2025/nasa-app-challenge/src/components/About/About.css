@@ -30,12 +30,9 @@
   margin-bottom: 100px;
 }
 
-/* Responsive for smaller screens */
-@media (max-width: 768px) {
-  .team-grid {
-    grid-template-columns: 1fr;
-    gap: 30px;
-  }
+/* Center the last card if the number of items is odd */
+.team-grid .member-card:last-child:nth-child(odd) {
+  justify-self: center; /* Center horizontally without changing size */
 }
 
 .member-card {
@@ -69,4 +66,16 @@
   font-size: 1rem;
   color: #666;
   line-height: 1.6;
+}
+
+/* Responsive for smaller screens */
+@media (max-width: 768px) {
+  .team-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .team-grid .member-card:last-child:nth-child(odd) {
+    justify-self: auto;
+  }
 }

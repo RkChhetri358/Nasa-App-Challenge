@@ -32,15 +32,15 @@ def find_crater(user_input, top_n=3):
 
     # Biggest / smallest
     if "biggest" in user_input or "largest" in user_input:
-        crater = max(craters, key=lambda c: c.get("diameter",0))
-        return [{"name": crater["name"], "coordinates": crater["coordinates"], 
-                 "diameter": crater["diameter"], "link": crater["link"], 
+        crater = max(craters, key=lambda c: c.get("diameter", 0))
+        return [{"name": crater["name"], "coordinates": crater["coordinates"],
+                 "diameter": crater["diameter"], "link": crater["link"],
                  "reason": "Largest crater found"}]
 
     if "smallest" in user_input:
-        crater = min(craters, key=lambda c: c.get("diameter",0))
-        return [{"name": crater["name"], "coordinates": crater["coordinates"], 
-                 "diameter": crater["diameter"], "link": crater["link"], 
+        crater = min(craters, key=lambda c: c.get("diameter", 0))
+        return [{"name": crater["name"], "coordinates": crater["coordinates"],
+                 "diameter": crater["diameter"], "link": crater["link"],
                  "reason": "Smallest crater found"}]
 
     # Coordinates search
@@ -48,22 +48,26 @@ def find_crater(user_input, top_n=3):
     if coords:
         lat, lon = coords
         nearest = find_nearest_craters(lat, lon, top_n=top_n)
-        return [{"name": c["name"], "coordinates": c["coordinates"], 
-                 "diameter": c["diameter"], "link": c["link"], 
+        return [{"name": c["name"], "coordinates": c["coordinates"],
+                 "diameter": c["diameter"], "link": c["link"],
                  "reason": f"Closest crater to ({lat},{lon})"} for c in nearest]
 
     # Name fuzzy search
     best_match, score, idx = process.extractOne(user_input, crater_names)
     if score > 60:
         crater = craters[idx]
-        return [{"name": crater["name"], "coordinates": crater["coordinates"], 
-                 "diameter": crater["diameter"], "link": crater["link"], 
+        return [{"name": crater["name"], "coordinates": crater["coordinates"],
+                 "diameter": crater["diameter"], "link": crater["link"],
                  "reason": f"Name matched with score {score}"}]
 
     # No match
     return []
 
 # --- Flask routes ---
+@app.route("/")
+def home():
+    return "Welcome to the Mercury Crater Search API! Use /search/?q=<query> to search."
+
 @app.route("/search/", methods=["GET", "POST"])
 def search_crater():
     if request.method == "GET":
@@ -78,6 +82,9 @@ def search_crater():
         query = data["query"]
 
     results = find_crater(query, top_n=3)
+    if not results:
+        return jsonify({"query": query, "results": [], "message": "No matching craters found"}), 404
+
     return jsonify({"query": query, "results": results})
 
 if __name__ == "__main__":
